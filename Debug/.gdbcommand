@@ -1,5 +1,5 @@
-set sysroot /home/tylee/tizen-studio/tools/smart-build-interface/../../platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core
-set debug-file-directory /home/tylee/tizen-studio/tools/smart-build-interface/../../platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core/usr/lib/debug
-set solib-search-path /home/tylee/workspace/DRG_BTPPG/Debug
-dir /home/tylee/tizen-studio/tools/smart-build-interface/../../platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core/usr/src/debug
+set sysroot C:/tizen-studio/platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core
+set debug-file-directory C:/tizen-studio/platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core/usr/lib/debug
+set solib-search-path C:/Users/gudtj/workspace/PPG/DRG_BTPPG/Debug
+dir C:/tizen-studio/platforms/tizen-2.3.1/wearable/rootstraps/wearable-2.3.1-device.core/usr/src/debug
 sharedlibrary

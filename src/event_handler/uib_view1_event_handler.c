@@ -61,12 +61,12 @@ example_sensor_callback(sensor_h sensor, sensor_event_s *event, uib_view1_view_c
     */
     sensor_type_e type;
     sensor_get_type(sensor, &type);
-    char *formatted_label = (char*)malloc(256 * sizeof(char));
-    if (type == SENSOR_HRM) {
-		sprintf(formatted_label, "<font=Tizen:style=Regular font_size=%d>HR=%3d</font>", FONT_SIZE,(int) event->values[0]);
+    char *formatted_label = (char*)malloc(256 * sizeof(char));	// 256문자가 들어갈 수 있는 label을 형성시킨다.
+    if (type == SENSOR_HRM) {	// 센서가 Heart Rate이면
+		sprintf(formatted_label, "<font=Tizen:style=Regular font_size=%d>HR=%3d</font>", FONT_SIZE,(int) event->values[0]);	// Heart Rate를 표시한다.
 		elm_object_text_set(user_data->hrm_data, formatted_label);
     }
-    if (type == SENSOR_HRM_LED_GREEN) {
+    if (type == SENSOR_HRM_LED_GREEN) {	// LED_GREEN 센서가 작동되면
 		sprintf(formatted_label, "<font=Tizen:style=Regular font_size=%d>%.2f</font>", FONT_SIZE,event->values[0]);
 		elm_object_text_set(user_data->ppg_green, formatted_label);
     }
@@ -103,8 +103,8 @@ example_sensor_callback(sensor_h sensor, sensor_event_s *event, uib_view1_view_c
 Eina_Bool
 end_sensor(listener){
 	// Release all resources.
-	sensor_listener_stop(listener);
-	sensor_destroy_listener(listener);
+	sensor_listener_stop(listener);	// Terminates the sensor server for the given listener.
+	sensor_destroy_listener(listener);	// Destory the sensor lisnter
 	return ECORE_CALLBACK_CANCEL;
 }
 
@@ -112,14 +112,14 @@ void
 start_sensor(sensor_type_e  sensor_type, uib_view1_view_context *vc){
 	//Set sensors and start recording
 	sensor_h sensor;
-	sensor_get_default_sensor(sensor_type, &sensor);
+	sensor_get_default_sensor(sensor_type, &sensor);	// Gets a specific sensor handle.
 	sensor_listener_h listener;
-	sensor_create_listener(sensor, &listener);
+	sensor_create_listener(sensor, &listener);	// Creates a sensor listener.
 	sensor_listener_set_event_cb(listener, 1000/SENSOR_FREQ, example_sensor_callback, vc); //25Hz
-	sensor_listener_set_option(listener, SENSOR_OPTION_ALWAYS_ON);
-	sensor_listener_start(listener);
+	sensor_listener_set_option(listener, SENSOR_OPTION_ALWAYS_ON); // Changes the option of the sensor.
+	sensor_listener_start(listener);	// Starts the sensor server for the given listener.
 	//End the sensors after the "recording time".
-	ecore_timer_add(recording_time,end_sensor,listener);
+	ecore_timer_add(recording_time,end_sensor,listener);	// Creates a timer to call the given function in the given period of time.
 }
 
 void
@@ -137,14 +137,14 @@ sensor_not_supported(sensor_name){
 
 void view1_start_stop_onclicked(uib_view1_view_context *vc, Evas_Object *obj, void *event_info) {
 	//PPG
-			bool supported_PPG = false;
-			sensor_type_e sensor_type_PPG = SENSOR_HRM_LED_GREEN;
-			sensor_is_supported(sensor_type_PPG, &supported_PPG);
-			if (!supported_PPG) {
-				char sensor_name_PPG[256] = "PPG";
-				sensor_not_supported(sensor_name_PPG);
+			bool supported_PPG = false;	// PPG support boolean variable 초기화
+			sensor_type_e sensor_type_PPG = SENSOR_HRM_LED_GREEN;	// LED GREEN으로 Heart Rate를 측정한다.
+			sensor_is_supported(sensor_type_PPG, &supported_PPG); 	// Checks whether a given sensor type is available on a device.
+			if (!supported_PPG) {	// sensor가 support가 안된다면
+				char sensor_name_PPG[256] = "PPG";	// sensor_name_PPG에 PPG 값을 집어 넣는다.
+				sensor_not_supported(sensor_name_PPG);	// sensor_not_supported 에 이름을 집어 넣는다?
 			} else{
-				start_sensor(sensor_type_PPG,vc);
+				start_sensor(sensor_type_PPG,vc);	// 센서 기능을 시작한다.
 			}
 
 			//HRM

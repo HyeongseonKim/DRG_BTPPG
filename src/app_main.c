@@ -22,7 +22,7 @@ static void _on_region_format_changed_cb(app_event_info_h event_info, void *user
 void
 nf_hw_back_cb(void* param, Evas_Object * evas_obj, void* event_info) {
 	//TODO : user define code
-	evas_obj = uib_views_get_instance()->get_window_obj()->app_naviframe;
+	evas_obj = uib_views_get_instance()->get_window_obj()->app_naviframe;	// app_naviframe을 이용하여 화면을 보여준다.
 	elm_naviframe_item_pop(evas_obj);
 }
 
@@ -40,24 +40,24 @@ nf_root_it_pop_cb(void* elm_win, Elm_Object_Item *it) {
 
 app_data *uib_app_create()
 {
-	return calloc(1, sizeof(app_data));
+	return calloc(1, sizeof(app_data));	// app_data 사이즈 만큼 메모리를 할당한다.
 }
-
+// 모든 view content 내용을 free시킨다.
 void uib_app_destroy(app_data *user_data)
 {
 	uib_app_manager_get_instance()->free_all_view_context();
-	free(user_data);
+	free(user_data);	// user data를 메모리 포인터에서 초기화한다.
 }
 
 int uib_app_run(app_data *user_data, int argc, char **argv)
 {
-	ui_app_lifecycle_callback_s cbs =
+	ui_app_lifecycle_callback_s cbs =	// 이게 무엇인가?, 함수들을 모아두었구만.
 	{
-		.create = _on_create_cb,
-		.terminate = _on_terminate_cb,
-		.pause = _on_pause_cb,
-		.resume = _on_resume_cb,
-		.app_control = _on_app_control_cb,
+		.create = _on_create_cb,		// app 실행할 때 부르는 함수
+		.terminate = _on_terminate_cb,	// app이 main loop이후에 한번 부르는 함수 
+		.pause = _on_pause_cb,			// app이 다른 app에 의해 모호해질때 그리고 유저에게 보이지 않을 때마다 불러진다.
+		.resume = _on_resume_cb,		// app이 유저에게 보일 때마다 불러진다..
+		.app_control = _on_app_control_cb,	// 다른 app이 app에게 launch request를 보낼 때 불러진다.
 	};
 
 	app_event_handler_h handlers[5] =
@@ -69,48 +69,58 @@ int uib_app_run(app_data *user_data, int argc, char **argv)
 	ui_app_add_event_handler(&handlers[APP_EVENT_LANGUAGE_CHANGED], APP_EVENT_LANGUAGE_CHANGED, _on_language_changed_cb, user_data);
 	ui_app_add_event_handler(&handlers[APP_EVENT_REGION_FORMAT_CHANGED], APP_EVENT_REGION_FORMAT_CHANGED, _on_region_format_changed_cb, user_data);
 
-	return ui_app_main(argc, argv, &cbs, user_data);
+	return ui_app_main(argc, argv, &cbs, user_data); // Runs the application's main loop until ui_app_exit() is called.
+	/*
+	 *This function is the main entry point of the Tizen application.
+ *          The app_create_cb() callback function is called to initialize the application before the main loop of application starts up.
+ *          After the app_create_cb() callback function returns true, the main loop starts up and the app_control_cb() callback function is subsequently called.
+ *          If the app_create_cb() callback function returns false, the main loop doesn't start up and app_terminate_cb() callback function is called.
+ *          This main loop supports event handling for the Ecore Main Loop.
+	 */
 }
 
 void
-app_get_resource(const char *res_file_in, char *res_path_out, int res_path_max)
+app_get_resource(const char *res_file_in, char *res_path_out, int res_path_max)	// app이 resource 파일을 읽어오는 것 같다.
 {
 	char *res_path = app_get_resource_path();
+	/* app_get_resource_path()
+	 * Gets the absolute path to the application resource directory. 
+	 * The resource files are delivered with the application package.
+	 */
 	if (res_path) {
 		snprintf(res_path_out, res_path_max, "%s%s", res_path, res_file_in);
 		free(res_path);
 	}
 }
 
-
+// error handler인거 같다. 
 void
 adapter_device_discovery_state_changed_cb(int result, bt_adapter_device_discovery_state_e discovery_state,
                                           bt_adapter_device_discovery_info_s *discovery_info, void* user_data)
 {
-    if (result != BT_ERROR_NONE) {
-        dlog_print(DLOG_ERROR, DRG_LOG_TAG, "[adapter_device_discovery_state_changed_cb] failed! result(%d).", result);
-
+    if (result != BT_ERROR_NONE) {	// BT와 관련한 ERROR가 발생시 작동한다.
+        dlog_print(DLOG_ERROR, DRG_LOG_TAG, "[adapter_device_discovery_state_changed_cb] failed! result(%d).", result);	// Send log with priority and tag.
         return;
     }
-    GList** searched_device_list = (GList**)user_data;
-    switch (discovery_state) {
-    case BT_ADAPTER_DEVICE_DISCOVERY_STARTED:
-        dlog_print(DLOG_INFO, DRG_LOG_TAG, "BT_ADAPTER_DEVICE_DISCOVERY_STARTED");
+    GList** searched_device_list = (GList**)user_data;	// List의 일종이고 더블 List이니 이중 List인듯 하다.
+    switch (discovery_state) {	// discovery_state는 0,1,2 값이 존재한다.
+    case BT_ADAPTER_DEVICE_DISCOVERY_STARTED:	// Device 탐색이 시작될 때
+        dlog_print(DLOG_INFO, DRG_LOG_TAG, "BT_ADAPTER_DEVICE_DISCOVERY_STARTED");	// Send log with priority and tag.
         break;
-    case BT_ADAPTER_DEVICE_DISCOVERY_FINISHED:
+    case BT_ADAPTER_DEVICE_DISCOVERY_FINISHED:	// Device 탐색이 끝났을 때
         dlog_print(DLOG_INFO, DRG_LOG_TAG, "BT_ADAPTER_DEVICE_DISCOVERY_FINISHED");
         break;
-    case BT_ADAPTER_DEVICE_DISCOVERY_FOUND:
+    case BT_ADAPTER_DEVICE_DISCOVERY_FOUND:	// Device를 찾지 못할 때
         dlog_print(DLOG_INFO, DRG_LOG_TAG, "BT_ADAPTER_DEVICE_DISCOVERY_FOUND");
-        if (discovery_info != NULL) {
-            dlog_print(DLOG_INFO, DRG_LOG_TAG, "Device Address: %s", discovery_info->remote_address);
+        if (discovery_info != NULL) {	// 탐색 정보에 뭐가 들어 있다면
+            dlog_print(DLOG_INFO, DRG_LOG_TAG, "Device Address: %s", discovery_info->remote_address);	// Device 주소를 보여준다.
             //dlog_print(DLOG_INFO, DRG_LOG_TAG, "Device Name is: %s", discovery_info->remote_name);
-            bt_adapter_device_discovery_info_s * new_device_info = malloc(sizeof(bt_adapter_device_discovery_info_s));
-            if (new_device_info != NULL) {
-                memcpy(new_device_info, discovery_info, sizeof(bt_adapter_device_discovery_info_s));
-                new_device_info->remote_address = strdup(discovery_info->remote_address);
-                new_device_info->remote_name = strdup(discovery_info->remote_name);
-                *searched_device_list = g_list_append(*searched_device_list, (gpointer)new_device_info);
+            bt_adapter_device_discovery_info_s * new_device_info = malloc(sizeof(bt_adapter_device_discovery_info_s));	// adapter device 정보를 담을 메모리 주소를 할당한다.
+            if (new_device_info != NULL) {	// 새로운 디바이스 정보가 있다면
+                memcpy(new_device_info, discovery_info, sizeof(bt_adapter_device_discovery_info_s));	// discovery info에 정보를 덧입힌다.
+                new_device_info->remote_address = strdup(discovery_info->remote_address);	// 새로운 디바이스 정보의 remote address를 갱신한다.
+                new_device_info->remote_name = strdup(discovery_info->remote_name);	// 새로운 디바이스 정보의 remote_name을 갱신한다.
+                *searched_device_list = g_list_append(*searched_device_list, (gpointer)new_device_info);	// g_list => doubly linked list
             }
         }
         break;
@@ -121,15 +131,16 @@ adapter_device_discovery_state_changed_cb(int result, bt_adapter_device_discover
 char *bt_server_address = NULL;
 const char *remote_server_name = "";
 
+// adpater와 연결된 디바이스 관련 정보를 보여준다.
 bool
 adapter_bonded_device_cb(bt_device_info_s *device_info, void *user_data)
 {
-    if (device_info == NULL)
+    if (device_info == NULL)	// 디바이스 정보가 없다면, true를  return한다.
         return true;
-    if (!strcmp(device_info->remote_name, (char*)user_data)) {
-        dlog_print(DLOG_INFO, DRG_LOG_TAG, "The server device is found in bonded device list. address(%s)",
+    if (!strcmp(device_info->remote_name, (char*)user_data)) { // 디바이스의 remote_name과 user_data와 user 데이터가 같다면
+        dlog_print(DLOG_INFO, DRG_LOG_TAG, "The server device is found in bonded device list. address(%s)",	// 연결된 디바이스 리스트에서 찾았다고 출력한다.
                    device_info->remote_address);
-        bt_server_address = strdup(device_info->remote_address);
+        bt_server_address = strdup(device_info->remote_address);	// bt_server_address는 device_info->remote_address가 된다.
         /* If you want to stop iterating, you can return "false" */
     }
     /* Get information about bonded device */
@@ -145,7 +156,7 @@ adapter_bonded_device_cb(bt_device_info_s *device_info, void *user_data)
     dlog_print(DLOG_INFO, DRG_LOG_TAG, "major_device_class %d.", device_info->bt_class.major_device_class);
     dlog_print(DLOG_INFO, DRG_LOG_TAG, "minor_device_class %d.", device_info->bt_class.minor_device_class);
     dlog_print(DLOG_INFO, DRG_LOG_TAG, "major_service_class_mask %d.", device_info->bt_class.major_service_class_mask);
-    count_of_bonded_device++;
+    count_of_bonded_device++;	// 연결된 디바이스의 카운트를 증가시킨다.
 
     /* Keep iterating */
 
@@ -165,7 +176,7 @@ static bool _on_create_cb(void *user_data)
 
 	bt_error_e ret;
 
-	ret = bt_initialize();
+	ret = bt_initialize();	// Bluetooth starts
 	if (ret != BT_ERROR_NONE) {
 	    dlog_print(DLOG_ERROR, DRG_LOG_TAG, "[bt_initialize] failed.");
 	}else{
@@ -182,12 +193,12 @@ static bool _on_create_cb(void *user_data)
 	    dlog_print(DLOG_ERROR, DRG_LOG_TAG, "Bluetooth adapter is not enabled. You should enable Bluetooth!!");
 
 
-	if (adapter_state == BT_ADAPTER_ENABLED) {
+	if (adapter_state == BT_ADAPTER_ENABLED) {	// Bluetooth가 가능한 상태를 의미한다.
 		dlog_print(DLOG_INFO, DRG_LOG_TAG, "[adapter_state] Bluetooth is enabled!");
 
 		/* Get information about Bluetooth adapter */
-		char *local_address = NULL;
-		bt_adapter_get_address(&local_address);
+		char *local_address = NULL;	// local_address 초기화
+		bt_adapter_get_address(&local_address);	//  Gets the address of local Bluetooth adapter., local address로 전달되는 것 같다.
 		dlog_print(DLOG_INFO, DRG_LOG_TAG, "[adapter_state] Adapter address: %s.", local_address);
 		if (local_address)
 			free(local_address);
